@@ -57,6 +57,13 @@ func (provisioner *RancherProvisioner) String() string {
 }
 
 func (provisioner *RancherProvisioner) Service(name string, action serviceaction.ServiceAction) error {
+	if name == "docker" && action == serviceaction.Stop && strings.HasPrefix(provisioner.Driver.DriverName(), "vmware")  {
+		command := fmt.Sprintf("sudo system-docker %s %s", action.String(), "open-vm-tools")
+
+		if _, err := provisioner.SSHCommand(command); err != nil {
+			return err
+		}
+	}
 	command := fmt.Sprintf("sudo system-docker %s %s", action.String(), name)
 
 	if _, err := provisioner.SSHCommand(command); err != nil {
